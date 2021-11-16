@@ -24,7 +24,7 @@ python test-single.thread.py --url "http://localhost:8080" --max-workers 2 --req
 ```
 
 ```csharp
- var graph = new Graph<string>(8);
+var graph = new Graph<string>(8);
 
 graph.Connect("1", "2", 1);
 graph.Connect("2", "3", 1);
