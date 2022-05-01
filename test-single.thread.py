@@ -1,6 +1,5 @@
 import argparse
 import json
-import sys
 import urllib3
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from time import time
@@ -30,11 +29,20 @@ def main():
     with open('payload.txt') as f:
         payload = json.load(f)
 
-    total_ms = 0
+    print('Sending 1 request without measuring time')
+    print('in order to warm up the JIT compiler...')
 
-    print('Sending', args.requests, 'requests')
-    print('Using', args.max_workers, 'max_workers')
+    post_and_measure_time(args.url, payload)
+
+    print('...done.')
+
+    print()
+
+    print(f'Sending {args.requests} requests')
+    print(f'Using {args.max_workers} max_workers')
     print('...')
+
+    total_ms = 0
 
     start = time()
 
@@ -45,17 +53,17 @@ def main():
             future = executor.submit(post_and_measure_time, args.url, payload)
             futures.append(future)
 
-        for future in as_completed(futures):
+        for i, future in enumerate(as_completed(futures), start=1):
             ms_elapsed = future.result()
-            print('...request processed in', ms_elapsed, 'ms')
+            print(f'...request #{i:2d} processed in {ms_elapsed} ms')
             total_ms += ms_elapsed
 
     end = time()
     total_elapsed = int((end - start) * 1000)
 
-    print('Average per request:', int(total_ms / args.requests))
-    print('Total elapsed:', total_elapsed)
-    print('Total throuput:', int(total_elapsed / args.requests))
+    print(f'* Average per request: {int(total_ms / args.requests)} ms')
+    print(f'* Total elapsed: {total_elapsed} ms')
+    print(f'* Total throuput: {int(total_elapsed / args.requests)} ms')
 
 if __name__ == '__main__':
     main()
