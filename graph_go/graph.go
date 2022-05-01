@@ -1,69 +1,71 @@
 package main
 
-var emptyStruct struct{}
+// var emptyStruct struct{}
 
 type Graph struct {
-	edges       map[interface{}]map[interface{}]int
-	inNeighbors map[interface{}]map[interface{}]struct{}
+	edges         map[interface{}]map[interface{}]int
+	inNeighbors   map[interface{}]map[interface{}]bool
+	expectedNodes int
 }
 
 func NewGraph(expectedNodes int) *Graph {
 	return &Graph{
-		edges:       make(map[interface{}]map[interface{}]int, expectedNodes),
-		inNeighbors: make(map[interface{}]map[interface{}]struct{}, expectedNodes),
+		edges:         make(map[interface{}]map[interface{}]int, expectedNodes),
+		inNeighbors:   make(map[interface{}]map[interface{}]bool, expectedNodes),
+		expectedNodes: expectedNodes,
 	}
 }
 
 func (graph *Graph) Connect(vertexFrom interface{}, vertexTo interface{}, weight int) {
 	if _, ok := graph.edges[vertexFrom]; !ok {
-		graph.edges[vertexFrom] = make(map[interface{}]int, len(graph.edges))
-		graph.inNeighbors[vertexFrom] = make(map[interface{}]struct{}, len(graph.inNeighbors))
+		graph.edges[vertexFrom] = make(map[interface{}]int, graph.expectedNodes)
+		graph.inNeighbors[vertexFrom] = make(map[interface{}]bool, graph.expectedNodes)
 	}
 
 	if _, ok := graph.edges[vertexTo]; !ok {
-		graph.edges[vertexTo] = make(map[interface{}]int, len(graph.edges))
-		graph.inNeighbors[vertexTo] = make(map[interface{}]struct{}, len(graph.inNeighbors))
+		graph.edges[vertexTo] = make(map[interface{}]int, graph.expectedNodes)
+		graph.inNeighbors[vertexTo] = make(map[interface{}]bool, graph.expectedNodes)
 	}
 
 	graph.edges[vertexFrom][vertexTo] = weight
-	graph.inNeighbors[vertexTo][vertexFrom] = emptyStruct
+	graph.inNeighbors[vertexTo][vertexFrom] = true
 }
 
-func (graph *Graph) FindAllOutNeighbors(vertex interface{}) map[interface{}]struct{} {
-	keys := make(map[interface{}]struct{}, len(graph.edges))
+func (graph *Graph) FindAllOutNeighbors(vertex interface{}) map[interface{}]bool {
+	keys := make(map[interface{}]bool, len(graph.edges))
 
 	for key := range graph.edges[vertex] {
-		keys[key] = emptyStruct
+		keys[key] = true
 	}
 
 	return keys
 }
 
-func (graph *Graph) FindAllInNeighbors(vertex interface{}) map[interface{}]struct{} {
-	keys := make(map[interface{}]struct{}, len(graph.edges))
+func (graph *Graph) FindAllInNeighbors(vertex interface{}) map[interface{}]bool {
+	keys := make(map[interface{}]bool, len(graph.edges))
 
 	for key := range graph.inNeighbors[vertex] {
-		keys[key] = emptyStruct
+		keys[key] = true
 	}
 
 	return keys
 }
 
-func (graph *Graph) FindAllVertices() map[interface{}]struct{} {
-	keys := make(map[interface{}]struct{}, len(graph.edges))
+func (graph *Graph) FindAllVertices() map[interface{}]bool {
+	keys := make(map[interface{}]bool, len(graph.edges))
 
 	for key := range graph.edges {
-		keys[key] = emptyStruct
+		keys[key] = true
 	}
 
 	return keys
 }
 
-func (graph *Graph) FindConnectedComponents() map[interface{}]map[interface{}]struct{} {
-	var visit func(interface{}, map[interface{}]struct{}, *[]interface{})
-	var assign func(interface{}, interface{}, map[interface{}]map[interface{}]struct{})
+func (graph *Graph) FindConnectedComponents() map[interface{}]map[interface{}]bool {
+	var visit func(interface{}, map[interface{}]bool, *[]interface{})
+	var assign func(interface{}, interface{}, map[interface{}]map[interface{}]bool)
 
-	visit = func(vertex interface{}, unvisited map[interface{}]struct{}, L *[]interface{}) {
+	visit = func(vertex interface{}, unvisited map[interface{}]bool, L *[]interface{}) {
 		if _, ok := unvisited[vertex]; ok {
 			delete(unvisited, vertex)
 
@@ -75,7 +77,7 @@ func (graph *Graph) FindConnectedComponents() map[interface{}]map[interface{}]st
 		}
 	}
 
-	assign = func(vertex interface{}, root interface{}, components map[interface{}]map[interface{}]struct{}) {
+	assign = func(vertex interface{}, root interface{}, components map[interface{}]map[interface{}]bool) {
 		hasBeenAssigned := false
 
 		for root := range components {
@@ -87,10 +89,10 @@ func (graph *Graph) FindConnectedComponents() map[interface{}]map[interface{}]st
 
 		if !hasBeenAssigned {
 			if _, ok := components[root]; !ok {
-				components[root] = make(map[interface{}]struct{})
+				components[root] = make(map[interface{}]bool)
 			}
 
-			components[root][vertex] = emptyStruct
+			components[root][vertex] = true
 
 			for neighbor := range graph.FindAllInNeighbors(vertex) {
 				assign(neighbor, root, components)
@@ -106,7 +108,7 @@ func (graph *Graph) FindConnectedComponents() map[interface{}]map[interface{}]st
 		visit(vertex, unvisited, &L)
 	}
 
-	components := make(map[interface{}]map[interface{}]struct{})
+	components := make(map[interface{}]map[interface{}]bool)
 
 	for i := len(L) - 1; i >= 0; i -= 1 {
 		assign(L[i], L[i], components)
