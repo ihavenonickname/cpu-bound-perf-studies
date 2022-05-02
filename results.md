@@ -24,13 +24,14 @@ Capacity    Speed
 Version:
 
 ```none
+$ dotnet --version
 6.0.100
 ```
 
 Compiled with:
 
 ```none
-dotnet publish --configuration Release --runtime win-x64
+$ dotnet publish --configuration Release --runtime win-x64
 ```
 
 ### 1 worker
@@ -74,13 +75,14 @@ dotnet publish --configuration Release --runtime win-x64
 Version:
 
 ```none
+$ go version
 go version go1.17.3 windows/amd64
 ```
 
 Compiled with:
 
 ```none
-go build -ldflags "-s -w"
+$ go build -ldflags "-s -w"
 ```
 
 ### 1 worker
@@ -124,6 +126,7 @@ go build -ldflags "-s -w"
 Version:
 
 ```none
+$ node --version
 v16.13.2
 ```
 
