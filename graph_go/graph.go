@@ -61,57 +61,54 @@ func (graph *Graph) FindAllVertices() map[interface{}]bool {
 	return keys
 }
 
+func (graph *Graph) visit(vertex interface{}, unvisited map[interface{}]bool, L *[]interface{}) {
+	if _, ok := unvisited[vertex]; ok {
+		delete(unvisited, vertex)
+
+		for neighbor := range graph.FindAllOutNeighbors(vertex) {
+			graph.visit(neighbor, unvisited, L)
+		}
+
+		*L = append(*L, vertex)
+	}
+}
+
+func (graph *Graph) assign(vertex interface{}, root interface{}, components map[interface{}]map[interface{}]bool) {
+	hasBeenAssigned := false
+
+	for root := range components {
+		if _, ok := components[root][vertex]; ok {
+			hasBeenAssigned = true
+			break
+		}
+	}
+
+	if !hasBeenAssigned {
+		if _, ok := components[root]; !ok {
+			components[root] = make(map[interface{}]bool)
+		}
+
+		components[root][vertex] = true
+
+		for neighbor := range graph.FindAllInNeighbors(vertex) {
+			graph.assign(neighbor, root, components)
+		}
+	}
+}
+
 func (graph *Graph) FindConnectedComponents() map[interface{}]map[interface{}]bool {
-	var visit func(interface{}, map[interface{}]bool, *[]interface{})
-	var assign func(interface{}, interface{}, map[interface{}]map[interface{}]bool)
-
-	visit = func(vertex interface{}, unvisited map[interface{}]bool, L *[]interface{}) {
-		if _, ok := unvisited[vertex]; ok {
-			delete(unvisited, vertex)
-
-			for neighbor := range graph.FindAllOutNeighbors(vertex) {
-				visit(neighbor, unvisited, L)
-			}
-
-			*L = append(*L, vertex)
-		}
-	}
-
-	assign = func(vertex interface{}, root interface{}, components map[interface{}]map[interface{}]bool) {
-		hasBeenAssigned := false
-
-		for root := range components {
-			if _, ok := components[root][vertex]; ok {
-				hasBeenAssigned = true
-				break
-			}
-		}
-
-		if !hasBeenAssigned {
-			if _, ok := components[root]; !ok {
-				components[root] = make(map[interface{}]bool)
-			}
-
-			components[root][vertex] = true
-
-			for neighbor := range graph.FindAllInNeighbors(vertex) {
-				assign(neighbor, root, components)
-			}
-		}
-	}
-
 	unvisited := graph.FindAllVertices()
 
 	L := make([]interface{}, 0, len(unvisited))
 
 	for vertex := range graph.FindAllVertices() {
-		visit(vertex, unvisited, &L)
+		graph.visit(vertex, unvisited, &L)
 	}
 
 	components := make(map[interface{}]map[interface{}]bool)
 
 	for i := len(L) - 1; i >= 0; i -= 1 {
-		assign(L[i], L[i], components)
+		graph.assign(L[i], L[i], components)
 	}
 
 	return components
