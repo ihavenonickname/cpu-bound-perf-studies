@@ -1,7 +1,8 @@
 import sys
+from json import dumps
 from typing import List
 
-from bottle import route, run, request, BaseRequest
+from bottle import route, run, request, BaseRequest, response
 
 from graph import Graph
 
@@ -18,7 +19,9 @@ def index():
 
     components = graph.find_connected_components()
 
-    return { k: list(v) for k, v in components.items() }
+    response.content_type = 'application/json'
+
+    return dumps([ list(x) for x in components.values() ])
 
 def main():
     sys.setrecursionlimit(3000)

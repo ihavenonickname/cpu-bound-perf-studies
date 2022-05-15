@@ -1,23 +1,15 @@
-from typing import Dict, Any, Set, List
-from collections import deque
+from typing import Dict, Any, Set
+from collections import deque, defaultdict
 
 class Graph():
     _edges: Dict[Any, Dict[Any, int]]
     _in_neighbors: Dict[Any, Set[Any]]
 
     def __init__(self):
-        self._edges = {}
-        self._in_neighbors = {}
+        self._edges = defaultdict(dict)
+        self._in_neighbors = defaultdict(set)
 
     def connect(self, vertex_from: Any, vertex_to: Any, weight: int):
-        if vertex_from not in self._edges:
-            self._edges[vertex_from] = {}
-            self._in_neighbors[vertex_from] = set()
-
-        if vertex_to not in self._edges:
-            self._edges[vertex_to] = {}
-            self._in_neighbors[vertex_to] = set()
-
         self._edges[vertex_from][vertex_to] = weight
         self._in_neighbors[vertex_to].add(vertex_from)
 
@@ -90,7 +82,12 @@ def main():
     graph.connect('8', '7', 1)
     graph.connect('8', '5', 1)
 
-    print(graph.find_connected_components())
+    actual = graph.find_connected_components()
+    expected = {'7': {'7', '8', '6'}, '2': {'3', '1', '2'}, '4': {'5', '4'}}
+
+    print(actual)
+    print()
+    print(expected)
 
 if __name__ == '__main__':
     main()
