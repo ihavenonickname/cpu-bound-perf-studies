@@ -5,9 +5,9 @@ https://en.wikipedia.org/wiki/Kosaraju%27s_algorithm
 Some snippets to help me to run the tests.
 
 ```none
-python test-single.thread.py --url "https://localhost:5001/Home" --max-workers 2 --requests 6
-python test-single.thread.py --url "http://localhost:3000" --max-workers 2 --requests 6
-python test-single.thread.py --url "http://localhost:8080" --max-workers 2 --requests 6
+python test-single.thread.py --url "http://localhost:5000/" --max-workers 2 --requests 18
+python test-single.thread.py --url "http://localhost:3000/" --max-workers 2 --requests 18
+python test-single.thread.py --url "http://localhost:8080/" --max-workers 2 --requests 18
 ```
 
 ```json

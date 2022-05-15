@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace GraphCsharp.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("/")]
     public class HomeController : ControllerBase
     {
         [HttpPost]
